@@ -3,9 +3,9 @@
 **KoBERT** 기반 뉴스 요약 시스템  
 URL만 붙여넣으면 뉴스 내용을 요약하여 빠르게 확인할 수 있습니다.
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python)
-![KoBERT](https://img.shields.io/badge/KoBERT-transformers-green)
-![FastAPI](https://img.shields.io/badge/FastAPI-async%20web%20framework-009688)
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
+![KoBERT](https://img.shields.io/badge/KoBERT-v0.2.3-green)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115.12-009688)
 ![Status](https://img.shields.io/badge/status-beta-orange)
 
 
