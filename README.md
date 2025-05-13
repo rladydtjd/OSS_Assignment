@@ -35,15 +35,15 @@ NewsTopicA(뉴스토픽아)는 사용자가 뉴스 기사 URL을 입력하면,
 | 딥러닝 모델 | KoBERT (KakaoBrain) |
 | 웹 프레임워크 | FastAPI |
 | 웹 크롤링 | BeautifulSoup, requests |
-| 요약 방법 | KoBERT + 텍스트 전처리 |
-| 배포 예정 | FastAPI |
+| 요약 방법 | KoBERT + KSS(Korean String processing Suite) |
+| 배포 | FastAPI |
 
 
 ## 🚀 시작하기
 
 ```bash
 # 1. 클론
-git clone https://github.com/your-username/NewsTopicA.git
+git clone https://github.com/Moomin03/OSS_Assignment.git
 cd NewsTopicA
 
 # 2. 가상환경 생성 및 패키지 설치
