@@ -1,141 +1,171 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OSS개론</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>현대뉴스</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 
-  <!-- 파비콘 -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <!-- Inter 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 
-  <!-- TailwindCSS CDN -->
+  <!-- Tailwind + dark mode 설정 -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter','sans-serif'] },
+          colors: { primary: '#1D1D1F', accent: '#0070F3' }
+        }
+      }
+    }
+  </script>
+
   <style>
-    .sr-only {
-      position: absolute; width:1px; height:1px;
-      padding:0; margin:-1px; overflow:hidden;
-      clip:rect(0,0,0,0); white-space:nowrap; border:0;
-    }
-    :root {
-      --primary: #1D1D1F;
-      --accent: #0070F3;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .animate-fade-in { animation: fade-in 0.6s ease forwards; }
+    .delay-150 { animation-delay: 0.15s; }
+    .delay-300 { animation-delay: 0.30s; }
+    .delay-450 { animation-delay: 0.45s; }
   </style>
 </head>
-<body class="bg-white text-gray-900 font-sans antialiased">
-  <div class="min-h-screen flex flex-col items-center justify-center px-4">
 
-    <h1 class="text-3xl sm:text-4xl md:text-5xl font-semibold mb-8" style="color: var(--primary);">
-      OSS개론
-    </h1>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-50 dark:from-gray-900 dark:to-gray-800 flex flex-col">
+  <!-- 헤더 -->
+  <header class="py-4 px-6 flex justify-between items-center">
+    <h1 class="text-2xl sm:text-3xl font-semibold text-primary dark:text-white">현대뉴스</h1>
+    <button id="theme-toggle" class="p-2 rounded-full bg-white/30 dark:bg-gray-700/30 backdrop-blur hover:bg-white/50 dark:hover:bg-gray-600/50 transition">
+      🌙
+    </button>
+  </header>
 
-    <!-- 1) 입력폼 + 실시간 인기 뉴스 패널 -->
-    <div class="w-full max-w-full sm:max-w-2xl lg:max-w-4xl flex flex-col lg:flex-row gap-6">
-      
-      <!-- 뉴스 요약 폼 -->
-      <form id="summarize-form"
-            class="flex-1 flex flex-col sm:flex-row items-center border-b-2 border-gray-300 focus-within:border-[var(--accent)]">
-        <label for="url" class="sr-only">뉴스 URL 입력</label>
-        <input type="url" id="url" name="url"
-               placeholder="뉴스 URL을 여기에 붙여넣으세요" required
-               class="flex-1 py-2 sm:py-3 px-3 sm:px-4 text-base sm:text-lg outline-none placeholder-gray-400" />
-        <button type="submit" id="submit-button"
-                class="mt-4 sm:mt-0 sm:ml-4 py-2 sm:py-3 px-4 sm:px-6 text-white font-medium rounded-2xl shadow-lg hover:opacity-90 transition"
-                style="background-color: var(--accent)"
-                aria-label="요약 요청">
-          전송
-        </button>
+  <!-- 메인 -->
+  <main class="flex-1 container mx-auto px-4 lg:px-0 flex flex-col lg:flex-row gap-8">
+    <!-- 왼쪽: 날씨 & 운세 -->
+    <section class="lg:w-1/4 flex flex-col gap-8">
+      <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in">
+        <h2 class="text-lg font-semibold text-primary dark:text-white mb-2">날씨</h2>
+        <p id="weather-content" class="text-2xl font-medium text-primary dark:text-gray-100">서울 · 맑음 · 24℃</p>
+      </div>
+
+      <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-150">
+        <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">오늘의 운세</h2>
+        <form id="fortune-form" class="flex gap-2">
+          <input type="number" id="birth-year" name="birth-year" min="1900" max="2025"
+                 placeholder="년도 입력"
+                 class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-accent outline-none dark:bg-gray-700/50 dark:placeholder-gray-400"/>
+          <button type="submit"
+                  class="px-4 py-2 bg-accent text-white rounded-lg shadow hover:opacity-90 transition">
+            보기
+          </button>
+        </form>
+        <p id="fortune-result" class="mt-4 text-gray-700 dark:text-gray-200"></p>
+      </div>
+    </section>
+
+    <!-- 가운데: URL 입력 & 요약 -->
+    <section class="lg:w-1/2 flex flex-col gap-8">
+      <form id="summarize-form" class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-300">
+        <div class="flex gap-3">
+          <input type="url" id="url" name="url"
+                 placeholder="뉴스 URL을 붙여넣으세요"
+                 class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-accent outline-none bg-white dark:bg-gray-700/50 placeholder-gray-400 dark:placeholder-gray-500"/>
+          <button type="submit" id="submit-button"
+                  class="px-6 py-3 bg-accent dark:bg-blue-600 text-white font-medium rounded-lg shadow hover:opacity-90 transition">
+            전송
+          </button>
+        </div>
       </form>
 
-      <!-- 실시간 인기 뉴스 패널 -->
-      <aside id="trending-panel"
-             class="w-full sm:w-64 bg-gray-50 rounded-2xl shadow p-4 flex flex-col
-                    max-h-32 hover:max-h-screen overflow-hidden hover:overflow-visible
-                    transition-all duration-300 ease-in-out">
-        <h2 class="text-lg font-medium mb-3">실시간 인기 뉴스</h2>
-        <ul id="trending-list" class="space-y-2">
-          <!-- JS로 동적 채워짐 -->
-        </ul>
-        <p id="trending-time" class="mt-4 text-xs text-gray-500">
-          마지막 업데이트: <time id="trending-updated-at">--:--:--</time>
-        </p>
-      </aside>
-    </div>
+      <div id="summary-box"
+           class="hidden bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg
+                  transform transition-all duration-500 ease-in-out opacity-0 -translate-y-4">
+        <h2 class="text-xl font-semibold text-primary dark:text-white mb-3">요약 내용</h2>
+        <p id="summary-text" class="text-gray-800 dark:text-gray-200 leading-relaxed"></p>
+      </div>
+    </section>
 
-    <!-- 2) 요약 결과 박스 -->
-    <div id="summary-box" role="status" aria-live="polite" tabindex="-1"
-         class="hidden mt-8 w-full max-w-full sm:max-w-2xl lg:max-w-4xl p-6 bg-gray-50 rounded-2xl shadow-xl 
-                transform transition-all duration-500 ease-in-out opacity-0 translate-y-4">
-      <h2 class="text-2xl font-medium mb-4" style="color: var(--primary);">요약 내용</h2>
-      <p id="summary-text" class="text-base leading-relaxed"></p>
-    </div>
+    <!-- 오른쪽: 실시간 인기 뉴스 -->
+    <aside class="lg:w-1/4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-450 flex flex-col">
+      <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">실시간 인기 뉴스</h2>
+      <ul id="trending-list" class="flex-1 overflow-auto space-y-3 pr-2 text-gray-800 dark:text-gray-200"></ul>
+      <p id="trending-time" class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+        마지막 업데이트: <time id="trending-updated-at">--:--:--</time>
+      </p>
+    </aside>
+  </main>
 
-    <footer class="mt-12 text-sm text-gray-500">&copy; 2025 OSS개론</footer>
-  </div>
+  <footer class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+    &copy; 2025 현대뉴스
+  </footer>
 
   <script>
-    // 실시간 인기 뉴스 로드
-    async function loadTrending() {
+    // 다크/라이트 모드 토글
+    const toggle = document.getElementById('theme-toggle');
+    toggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      toggle.textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // 뉴스 요약
+    document.getElementById('summarize-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-button');
+      btn.disabled = true; btn.textContent = '요약 중...';
+
+      try {
+        const url = document.getElementById('url').value;
+        const res = await fetch('/api/summarize', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({url})
+        });
+        const { summary } = await res.json();
+        document.getElementById('summary-text').textContent = summary;
+        const box = document.getElementById('summary-box');
+        box.classList.remove('hidden');
+        setTimeout(() => {
+          box.classList.replace('opacity-0','opacity-100');
+          box.classList.replace('-translate-y-4','translate-y-0');
+        }, 50);
+      } catch {
+        alert('요약 중 오류가 발생했습니다');
+      } finally {
+        btn.disabled = false; btn.textContent = '전송';
+      }
+    });
+
+    // 인기 뉴스 로드
+    async function loadTrending(){
       try {
         const res = await fetch('/api/trending-news?top_n=5');
         const { trending } = await res.json();
         const ul = document.getElementById('trending-list');
-        ul.innerHTML = trending.map((item, i) => `
-          <li class="flex items-start">
-            <div class="w-6 h-6 flex items-center justify-center 
+        ul.innerHTML = trending.map((it,i)=>`
+          <li class="flex items-start gap-3">
+            <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center
                         ${['bg-blue-500','bg-blue-400','bg-blue-300','bg-blue-200','bg-blue-100'][i]}
-                        ${i===4 ? 'text-gray-800' : 'text-white'} rounded-full text-sm flex-shrink-0">
-              ${i+1}
-            </div>
-            <span class="ml-2">${item.title}</span>
+                        ${i===4?'text-gray-800':'text-white'}
+                        rounded-full text-sm">${i+1}</div>
+            <p class="flex-1">${it.title}</p>
           </li>
         `).join('');
         document.getElementById('trending-updated-at').textContent =
           new Date().toLocaleTimeString();
       } catch (e) {
-        console.error('트렌딩 로드 실패', e);
+        console.error('인기 뉴스 로드 실패', e);
       }
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       loadTrending();
-
-      // 요약 폼 처리
-      const form = document.getElementById('summarize-form');
-      const btn  = document.getElementById('submit-button');
-      const box  = document.getElementById('summary-box');
-      const text = document.getElementById('summary-text');
-
-      form.addEventListener('submit', async e => {
+      // 오늘의 운세 (샘플)
+      document.getElementById('fortune-form').addEventListener('submit', e => {
         e.preventDefault();
-        btn.disabled = true;
-        btn.textContent = '요약 중...';
-
-        try {
-          const url = document.getElementById('url').value;
-          const res = await fetch('/api/summarize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
-          });
-          const data = await res.json();
-          text.textContent = data.summary;
-
-          box.classList.remove('hidden');
-          setTimeout(() => {
-            box.classList.remove('opacity-0','translate-y-4');
-            box.classList.add('opacity-100','translate-y-0');
-            box.focus();
-          }, 50);
-
-          // 요약 후 트렌딩 갱신
-          setTimeout(loadTrending, 300);
-        } catch {
-          alert('요약 중 오류가 발생했습니다.');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = '전송';
-        }
+        const y = document.getElementById('birth-year').value;
+        document.getElementById('fortune-result')
+                .textContent = `${y}년생 운세: 로또 당첨 각!`;
       });
     });
   </script>
