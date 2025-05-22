@@ -2,4 +2,8 @@
 __pycache__
 .ipynb_checkpoints
 app/routers/.DS_Store
-debug_ytn_html*
+debug_ytn_html_*
+.DS_Store
+debug_ytn_html_ln_0101_202505221240224360.html
+debug_ytn_html_ln_0102_202505131823051691.html
+debug_ytn_html_ln_0102_202505201200417914.html
