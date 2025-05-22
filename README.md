@@ -11,7 +11,7 @@ URL만 붙여넣으면 뉴스 내용을 요약하여 빠르게 확인할 수 있
 
 ## 📌 소개
 
-ModernNews(현대뉴스)는 사용자가 뉴스 기사 URL을 입력하면,  
+**ModernNews(현대뉴스)**는 사용자가 뉴스 기사 URL을 입력하면,  
 해당 뉴스 내용을 자동으로 크롤링하고 **KoBERT 모델을 통해 요약**하여 보여주는 시스템입니다.  
 앞으로는 **날씨 정보**, **운세 정보**, **실시간 이슈** 등의 기능도 추가할 예정입니다.
 
@@ -43,8 +43,8 @@ ModernNews(현대뉴스)는 사용자가 뉴스 기사 URL을 입력하면,
 
 ```bash
 # 1. 클론
-git clone https://github.com/Moomin03/OSS_Assignment.git
-cd NewsTopicA
+git clone https://github.com/Moomin03/ModernNews.git
+cd ModernNews
 
 # 2. 가상환경 생성 및 패키지 설치
 python -m venv .venv
