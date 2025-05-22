@@ -57,4 +57,4 @@ uvicorn app.main:app --reload
 
 ## 🔧 웹사이트 동작
 
-![gif](https://github.com/Moomin03/OSS_Assignment/blob/main/images/operation.gif)
+![gif](https://github.com/Moomin03/OSS_Assignment/blob/main/images/operation%20gif.gif)
