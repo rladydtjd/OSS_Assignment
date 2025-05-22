@@ -8,6 +8,7 @@ import os
 
 
 def process_url(url: str) -> str:
+    print('함수 시작')
     # URL을 받아서 뭔가 처리 후 문자열 결과 리턴
     # --- YTN 메인 메뉴 HTML 스니펫 (제공해주신 내용) ---
 # 이 HTML을 파싱하여 카테고리 맵을 생성합니다.
@@ -268,3 +269,4 @@ def process_url(url: str) -> str:
     summary = summarize(text)
     summary = " ".join(summary)
     return f"{summary}"
+    print(summary)

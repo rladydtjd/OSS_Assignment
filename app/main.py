@@ -7,15 +7,21 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import os # 파일 존재 여부 확인을 위해 os 모듈 임포트
 
+# summarize.py에서 정의한 라우터 가져오기
+from app.routers.summarize import (
+    router as summarize_router,
+    summarize_news,
+    SummarizeRequest
+)
 # FastAPI 앱 인스턴스 생성
 app = FastAPI()
 
 # 템플릿 파일 경로 설정 (HTML 파일을 'templates' 폴더에 두었다고 가정합니다)
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 # CSV 파일 경로 (main_fastapi.py 파일과 같은 폴더에 있다고 가정합니다)
 # 파일 이름은 '띠별_년생_운세수정버전.csv'입니다.
-CSV_FILE_PATH = '띠별_년생_운세수정버전.csv'
+CSV_FILE_PATH = 'app/fortune.csv'
 # 운세 데이터를 저장할 DataFrame 변수
 fortune_df = None
 
@@ -59,37 +65,8 @@ async def read_root(request: Request):
     # context에 request를 포함시켜야 템플릿에서 url_for 등의 함수를 사용할 수 있습니다.
     return templates.TemplateResponse("index.html", {"request": request})
 
-# 뉴스 요약 API 요청 모델 정의 (Pydantic 사용)
-class SummarizeRequest(BaseModel):
-    url: str
-
-# 뉴스 요약 API 엔드포인트
-@app.post("/api/summarize")
-async def summarize_news(request_data: SummarizeRequest):
-    url = request_data.url
-
-    if not url:
-        # FastAPI에서 오류 응답은 HTTPException을 사용합니다.
-        raise HTTPException(status_code=400, detail="URL을 입력해주세요.")
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status() # HTTP 오류 발생 시 예외 발생
-
-        soup = BeautifulSoup(response.content, 'html.parser')
-        text = soup.get_text(separator='\n', strip=True)
-
-        summary = text[:500] + "..." if len(text) > 500 else text
-
-        # FastAPI는 dict나 list를 반환하면 자동으로 JSONResponse로 변환합니다.
-        return {"summary": summary}
-
-    except requests.exceptions.RequestException as e:
-        print(f"URL 요청 중 오류 발생: {e}")
-        raise HTTPException(status_code=500, detail="뉴스 내용을 가져오지 못했습니다.")
-    except Exception as e:
-        print(f"뉴스 요약 중 오류 발생: {e}")
-        raise HTTPException(status_code=500, detail="뉴스 요약 중 오류가 발생했습니다.")
+# 4) 요약 API 라우터 등록
+app.include_router(summarize_router, prefix="/api")
 
 # 실시간 인기 뉴스 API 엔드포인트
 @app.get("/api/trending-news")
