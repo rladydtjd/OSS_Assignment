@@ -1,173 +1,253 @@
 <!DOCTYPE html>
 <html lang="ko" class="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>현대뉴스</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>현대뉴스</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-  <!-- Inter 폰트 -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <!-- Inter 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind + dark mode 설정 -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { inter: ['Inter','sans-serif'] },
-          colors: { primary: '#1D1D1F', accent: '#0070F3' }
+    <!-- Tailwind + dark mode 설정 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#1D1D1F', accent: '#0070F3' }
+                }
+            }
         }
-      }
-    }
-  </script>
+    </script>
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-    .animate-fade-in { animation: fade-in 0.6s ease forwards; }
-    .delay-150 { animation-delay: 0.15s; }
-    .delay-300 { animation-delay: 0.30s; }
-    .delay-450 { animation-delay: 0.45s; }
-  </style>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.6s ease forwards;
+        }
+
+        .delay-150 {
+            animation-delay: 0.15s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.30s;
+        }
+
+        .delay-450 {
+            animation-delay: 0.45s;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-50 dark:from-gray-900 dark:to-gray-800 flex flex-col">
-  <!-- 헤더 -->
-  <header class="py-4 px-6 flex justify-between items-center">
-    <h1 class="text-2xl sm:text-3xl font-semibold text-primary dark:text-white">현대뉴스</h1>
-    <button id="theme-toggle" class="p-2 rounded-full bg-white/30 dark:bg-gray-700/30 backdrop-blur hover:bg-white/50 dark:hover:bg-gray-600/50 transition">
-      🌙
-    </button>
-  </header>
+    <!-- 헤더 -->
+    <header class="py-4 px-6 flex justify-between items-center">
+        <h1 class="text-2xl sm:text-3xl font-semibold text-primary dark:text-white">현대뉴스</h1>
+        <button id="theme-toggle" class="p-2 rounded-full bg-white/30 dark:bg-gray-700/30 backdrop-blur hover:bg-white/50 dark:hover:bg-gray-600/50 transition">
+            🌙
+        </button>
+    </header>
 
-  <!-- 메인 -->
-  <main class="flex-1 container mx-auto px-4 lg:px-0 flex flex-col lg:flex-row gap-8">
-    <!-- 왼쪽: 날씨 & 운세 -->
-    <section class="lg:w-1/4 flex flex-col gap-8">
-      <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in">
-        <h2 class="text-lg font-semibold text-primary dark:text-white mb-2">날씨</h2>
-        <p id="weather-content" class="text-2xl font-medium text-primary dark:text-gray-100">서울 · 맑음 · 24℃</p>
-      </div>
+    <!-- 메인 -->
+    <main class="flex-1 container mx-auto px-4 lg:px-0 flex flex-col lg:flex-row gap-8">
+        <!-- 왼쪽: 날씨 & 운세 -->
+        <section class="lg:w-1/4 flex flex-col gap-8">
+            <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in">
+                <h2 class="text-lg font-semibold text-primary dark:text-white mb-2">날씨</h2>
+                <p id="weather-content" class="text-2xl font-medium text-primary dark:text-gray-100">서울 · 맑음 · 24℃</p>
+            </div>
 
-      <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-150">
-        <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">오늘의 운세</h2>
-        <form id="fortune-form" class="flex gap-2">
-          <input type="number" id="birth-year" name="birth-year" min="1900" max="2025"
-                 placeholder="년도 입력"
-                 class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-accent outline-none dark:bg-gray-700/50 dark:placeholder-gray-400"/>
-          <button type="submit"
-                  class="px-4 py-2 bg-accent text-white rounded-lg shadow hover:opacity-90 transition">
-            보기
-          </button>
-        </form>
-        <p id="fortune-result" class="mt-4 text-gray-700 dark:text-gray-200"></p>
-      </div>
-    </section>
+            <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-150">
+                <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">오늘의 운세</h2>
+                <form id="fortune-form" class="flex gap-2">
+                    <input type="number" id="birth-year" name="birth-year" min="1900" max="2025"
+                           placeholder="년도 입력"
+                           class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-accent outline-none dark:bg-gray-700/50 dark:placeholder-gray-400" />
+                    <button type="submit"
+                            class="px-4 py-2 bg-accent text-white rounded-lg shadow hover:opacity-90 transition">
+                        보기
+                    </button>
+                </form>
+                <p id="fortune-result" class="mt-4 text-gray-700 dark:text-gray-200"></p>
+            </div>
+        </section>
 
-    <!-- 가운데: URL 입력 & 요약 -->
-    <section class="lg:w-1/2 flex flex-col gap-8">
-      <form id="summarize-form" class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-300">
-        <div class="flex gap-3">
-          <input type="url" id="url" name="url"
-                 placeholder="뉴스 URL을 붙여넣으세요"
-                 class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-accent outline-none bg-white dark:bg-gray-700/50 placeholder-gray-400 dark:placeholder-gray-500"/>
-          <button type="submit" id="submit-button"
-                  class="px-6 py-3 bg-accent dark:bg-blue-600 text-white font-medium rounded-lg shadow hover:opacity-90 transition">
-            전송
-          </button>
-        </div>
-      </form>
+        <!-- 가운데: URL 입력 & 요약 -->
+        <section class="lg:w-1/2 flex flex-col gap-8">
+            <form id="summarize-form" class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-300">
+                <div class="flex gap-3">
+                    <input type="url" id="url" name="url"
+                           placeholder="뉴스 URL을 붙여넣으세요"
+                           class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-accent outline-none bg-white dark:bg-gray-700/50 placeholder-gray-400 dark:placeholder-gray-500" />
+                    <button type="submit" id="submit-button"
+                            class="px-6 py-3 bg-accent dark:bg-blue-600 text-white font-medium rounded-lg shadow hover:opacity-90 transition">
+                        전송
+                    </button>
+                </div>
+            </form>
 
-      <div id="summary-box"
-           class="hidden bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg
+            <div id="summary-box"
+                 class="hidden bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg
                   transform transition-all duration-500 ease-in-out opacity-0 -translate-y-4">
-        <h2 class="text-xl font-semibold text-primary dark:text-white mb-3">요약 내용</h2>
-        <p id="summary-text" class="text-gray-800 dark:text-gray-200 leading-relaxed"></p>
-      </div>
-    </section>
+                <h2 class="text-xl font-semibold text-primary dark:text-white mb-3">요약 내용</h2>
+                <p id="summary-text" class="text-gray-800 dark:text-gray-200 leading-relaxed"></p>
+            </div>
+        </section>
 
-    <!-- 오른쪽: 실시간 인기 뉴스 -->
-    <aside class="lg:w-1/4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-450 flex flex-col">
-      <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">실시간 인기 뉴스</h2>
-      <ul id="trending-list" class="flex-1 overflow-auto space-y-3 pr-2 text-gray-800 dark:text-gray-200"></ul>
-      <p id="trending-time" class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-        마지막 업데이트: <time id="trending-updated-at">--:--:--</time>
-      </p>
-    </aside>
-  </main>
+        <!-- 오른쪽: 실시간 인기 뉴스 -->
+        <aside class="lg:w-1/4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl p-6 shadow-lg animate-fade-in delay-450 flex flex-col">
+            <h2 class="text-lg font-semibold text-primary dark:text-white mb-4">실시간 인기 뉴스</h2>
+            <ul id="trending-list" class="flex-1 overflow-auto space-y-3 pr-2 text-gray-800 dark:text-gray-200"></ul>
+            <p id="trending-time" class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                마지막 업데이트: <time id="trending-updated-at">--:--:--</time>
+            </p>
+        </aside>
+    </main>
 
-  <footer class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-    &copy; 2025 현대뉴스
-  </footer>
+    <footer class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        &copy; 2025 현대뉴스
+    </footer>
 
-  <script>
-    // 다크/라이트 모드 토글
-    const toggle = document.getElementById('theme-toggle');
-    toggle.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      toggle.textContent = isDark ? '☀️' : '🌙';
-    });
-
-    // 뉴스 요약
-    document.getElementById('summarize-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn = document.getElementById('submit-button');
-      btn.disabled = true; btn.textContent = '요약 중...';
-
-      try {
-        const url = document.getElementById('url').value;
-        const res = await fetch('/api/summarize', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({url})
+    <script>
+        // 다크/라이트 모드 토글
+        const toggle = document.getElementById('theme-toggle');
+        toggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            toggle.textContent = isDark ? '☀️' : '🌙'; // 이모지 사용 시 ' 또는 " 로 감싸야 합니다.
         });
-        const { summary } = await res.json();
-        document.getElementById('summary-text').textContent = summary;
-        const box = document.getElementById('summary-box');
-        box.classList.remove('hidden');
-        setTimeout(() => {
-          box.classList.replace('opacity-0','opacity-100');
-          box.classList.replace('-translate-y-4','translate-y-0');
-        }, 50);
-      } catch {
-        alert('요약 중 오류가 발생했습니다');
-      } finally {
-        btn.disabled = false; btn.textContent = '전송';
-      }
-    });
 
-    // 인기 뉴스 로드
-    async function loadTrending(){
-      try {
-        const res = await fetch('/api/trending-news?top_n=5');
-        const { trending } = await res.json();
-        const ul = document.getElementById('trending-list');
-        ul.innerHTML = trending.map((it,i)=>`
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center
-                        ${['bg-blue-500','bg-blue-400','bg-blue-300','bg-blue-200','bg-blue-100'][i]}
-                        ${i===4?'text-gray-800':'text-white'}
-                        rounded-full text-sm">${i+1}</div>
-            <p class="flex-1">${it.title}</p>
-          </li>
-        `).join('');
-        document.getElementById('trending-updated-at').textContent =
-          new Date().toLocaleTimeString();
-      } catch (e) {
-        console.error('인기 뉴스 로드 실패', e);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      loadTrending();
-      // 오늘의 운세 (샘플)
-      document.getElementById('fortune-form').addEventListener('submit', e => {
-        e.preventDefault();
-        const y = document.getElementById('birth-year').value;
-        document.getElementById('fortune-result')
-                .textContent = `${y}년생 운세: 로또 당첨 각!`;
-      });
-    });
-  </script>
+        // 뉴스 요약
+        document.getElementById('summarize-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-button');
+            btn.disabled = true; btn.textContent = '요약 중...';
+
+            try {
+                const url = document.getElementById('url').value;
+                const res = await fetch('/api/summarize', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                const { summary } = await res.json();
+                document.getElementById('summary-text').textContent = summary;
+                const box = document.getElementById('summary-box');
+                box.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.replace('opacity-0', 'opacity-100');
+                    box.classList.replace('-translate-y-4', 'translate-y-0');
+                }, 50);
+            } catch {
+                alert('요약 중 오류가 발생했습니다');
+            } finally {
+                btn.disabled = false; btn.textContent = '전송';
+            }
+        });
+
+        // 인기 뉴스 로드
+        async function loadTrending() {
+            try {
+                const res = await fetch('/api/trending-news?top_n=5');
+                const { trending } = await res.json();
+                const ul = document.getElementById('trending-list');
+                ul.innerHTML = trending.map((it, i) => `
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center
+                            ${['bg-blue-500', 'bg-blue-400', 'bg-blue-300', 'bg-blue-200', 'bg-blue-100'][i]}
+                            ${i === 4 ? 'text-gray-800' : 'text-white'}
+                            rounded-full text-sm">${i + 1}</div>
+                <p class="flex-1">${it.title}</p>
+              </li>
+            `).join('');
+                document.getElementById('trending-updated-at').textContent =
+                    new Date().toLocaleTimeString();
+            } catch (e) {
+                console.error('인기 뉴스 로드 실패', e);
+            }
+        }
+
+        // --- 여기에 운세 기능 관련 JavaScript 코드를 추가합니다 ---
+        document.addEventListener('DOMContentLoaded', () => { // DOMContentLoaded 리스너 안에 이 코드를 넣거나, 별도의 리스너로 추가합니다.
+            // loadTrending(); // 이 부분은 기존 DOMContentLoaded 안에 있을 수 있습니다.
+            // loadTrending() 호출 아래에 운세 코드 추가
+
+            const fortuneForm = document.getElementById('fortune-form');
+            const birthYearInput = document.getElementById('birth-year');
+            const fortuneResult = document.getElementById('fortune-result');
+
+            // 운세 폼 제출 이벤트 리스너 추가
+            fortuneForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // 폼 기본 제출 동작 방지
+
+                const birthYear = birthYearInput.value; // 입력된 출생 연도 가져오기
+
+                // 입력 값 유효성 검사 (간단하게 숫자인지 확인)
+                if (!birthYear || !/^\d{4}$/.test(birthYear)) {
+                    fortuneResult.textContent = '올바른 출생 연도(4자리 숫자)를 입력해주세요.';
+                    fortuneResult.style.color = 'red'; // 오류 메시지는 빨간색으로 표시
+                    return;
+                }
+
+                // 백엔드로 데이터 전송
+                try {
+                    const response = await fetch('/api/fortune', { // 백엔드의 운세 API 엔드포인트
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ birth_year: parseInt(birthYear) }) // JSON 형식으로 데이터 전송
+                    });
+
+                    const data = await response.json(); // 백엔드 응답을 JSON으로 파싱
+
+                    // 응답 상태 확인
+                    if (response.ok) { // 상태 코드가 200-299 범위인 경우
+                        // 받아온 띠와 운세 내용을 HTML에 표시
+                        // 데이터 구조 확인: 백엔드에서 {'띠': ..., '운세': ...} 형태로 보낸다고 가정
+                        if (data.띠 && data.운세) {
+                            fortuneResult.textContent = `${data.띠}: ${data.운세}`;
+                            fortuneResult.style.color = ''; // 정상 메시지는 색상 초기화
+                        } else {
+                            // 예상치 못한 응답 형식
+                            fortuneResult.textContent = '운세 정보를 표시할 수 없습니다.';
+                            fortuneResult.style.color = 'red';
+                        }
+
+                    } else { // 오류 응답인 경우
+                        fortuneResult.textContent = `오류: ${data.error || '운세 정보를 가져오지 못했습니다.'}`;
+                        fortuneResult.style.color = 'red'; // 오류 메시지는 빨간색으로 표시
+                    }
+
+                } catch (error) {
+                    console.error('운세 정보를 가져오는 중 오류 발생:', error);
+                    fortuneResult.textContent = '운세 정보를 가져오는 중 통신 오류가 발생했습니다.';
+                    fortuneResult.style.color = 'red'; // 오류 메시지는 빨간색으로 표시
+                }
+            });
+        });
+        // --- 운세 기능 관련 JavaScript 코드 끝 ---
+
+        // loadTrending 함수 호출 (기존 코드 위치)
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTrending();
+        }); // 이 부분이 HTML 코드의 마지막 부분에서 잘린 것으로 보입니다.
+
+    </script>
 </body>
 </html>
