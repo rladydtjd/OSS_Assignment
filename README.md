@@ -55,6 +55,6 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-## 🔧 웹사이트 동
+## 🔧 웹사이트 동작
 
 ![gif](https://github.com/Moomin03/OSS_Assignment/blob/main/Crawling/%ED%98%84%EB%8C%80%EB%89%B4%EC%8A%A4-Chrome-2025-05-22-08-50-26.gif)
