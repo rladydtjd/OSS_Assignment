@@ -1,4 +1,4 @@
-# ModernNews v1.1.0
+# ModernNews v1.1.1
 
 **KoBERT** 기반 뉴스 요약 시스템  
 URL만 붙여넣으면 뉴스 내용을 요약하여 빠르게 확인할 수 있습니다.
