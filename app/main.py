@@ -6,6 +6,13 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import os # 파일 존재 여부 확인을 위해 os 모듈 임포트
+from fastapi import FastAPI, Form, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
+from starlette.requests import Request
+import httpx
+import xml.etree.ElementTree as ET
 
 # summarize.py에서 정의한 라우터 가져오기
 from app.routers.summarize import (
@@ -68,18 +75,50 @@ async def read_root(request: Request):
 # 4) 요약 API 라우터 등록
 app.include_router(summarize_router, prefix="/api")
 
-# 실시간 인기 뉴스 API 엔드포인트
+# 5) 실시간 인기 뉴스 RSS 파싱 엔드포인트
 @app.get("/api/trending-news")
-async def get_trending_news(top_n: int = 5): # 쿼리 파라미터는 함수 인자로 정의
-    trending_data = [
-        {'title': '오늘의 주요 경제 지표 발표', 'url': '#'},
-        {'title': 'AI 기술, 산업 전반에 영향', 'url': '#'},
-        {'title': '최신 스마트폰 출시 소식', 'url': '#'},
-        {'title': '주말 날씨 예보', 'url': '#'},
-        {'title': '건강한 식습관 팁', 'url': '#'},
-    ]
-    return {"trending": trending_data[:top_n]} # dict 형태로 반환하면 JSON 응답
+async def trending_news(top_n: int = 5):
+    """
+    JTBC 이슈 RSS 피드에서 상위 top_n개 뉴스 제목을 가져옵니다.
+    """
+    RSS_URL = "https://news-ex.jtbc.co.kr/v1/get/rss/issue"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.get(RSS_URL)
+            res.raise_for_status()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"RSS 호출 실패: {e}")
 
+    try:
+        root = ET.fromstring(res.text)
+        channel = root.find("channel")
+        items = channel.findall("item") if channel is not None else []
+        trending = []
+        for item in items[:top_n]:
+            title_el = item.find("title")
+            if title_el is not None and title_el.text:
+                trending.append({"title": title_el.text})
+        return {"trending": trending}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"RSS 파싱 실패: {e}")
+
+# 6) 메인 페이지 (GET /)
+@app.get("/")
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+# 7) 폼 제출 처리 (POST /)
+@app.post("/")
+async def index_post(request: Request, url: str = Form(...)):
+    resp = await summarize_news(SummarizeRequest(url=url))
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "summary": resp.summary
+        }
+    )
+    
 # 운세 검색 API 요청 모델 정의 (Pydantic 사용)
 class FortuneRequest(BaseModel):
     birth_year: int # 출생 연도는 숫자로 받도록 명시
