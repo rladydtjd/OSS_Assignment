@@ -1,0 +1,241 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import time
+import json
+import pandas as pd
+# webdriver-manager에서 ChromeDriverManager 임포트
+from webdriver_manager.chrome import ChromeDriverManager
+
+# --- 설정 ---
+# webdriver-manager를 사용하므로 더 이상 webdriver_path를 직접 지정할 필요 없습니다.
+# webdriver_path = 'C:/Users/Kimyongseong/Desktop/work/chromedriver.exe' # <- 이 줄은 이제 사용하지 않습니다.
+
+# 목표 웹페이지 URL
+base_url = 'https://fortune.nate.com/contents/freeunse/freeunseframe.nate?freeUnseId=today03'
+
+# headless 모드 설정 (브라우저 창을 띄우지 않고 백그라운드 실행)
+# 브라우저 동작을 직접 보면서 테스트하려면 아래 options 줄을 주석 처리하거나 headless=False로 변경
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+options.add_argument('--log-level=3') # Selenium 로그 레벨 설정
+
+# 추출된 모든 띠의 년생별 운세 데이터를 저장할 딕셔너리 초기화
+all_ddi_fortune_data = {}
+driver = None # 드라이버 객체 초기화
+
+try:
+    # --- WebDriver 설정 및 실행 (webdriver-manager 사용) ---
+    # ChromeDriverManager().install() 메서드가 사용자의 Chrome 버전에 맞는 ChromeDriver를 찾거나 다운로드하여 경로를 반환합니다.
+    # 그 경로를 Service 객체에 전달하여 WebDriver를 실행합니다.
+    print("Chrome WebDriver 설정 중 (webdriver-manager 사용)...")
+    # Service 객체 생성 시 executable_path 대신 Service 클래스 자체를 사용합니다.
+    service = Service(ChromeDriverManager().install())
+    print("Chrome WebDriver 설정 완료.")
+
+
+    # Chrome WebDriver 실행
+    driver = webdriver.Chrome(service=service, options=options)
+    print("WebDriver 실행 성공.")
+
+    # 웹페이지 열기
+    driver.get(base_url)
+    print(f"'{base_url}' 페이지 로딩 중...")
+
+    # iframe으로 전환 (실제 iframe ID는 "contentFrame" 입니다.)
+    WebDriverWait(driver, 20).until(
+         EC.frame_to_be_available_and_switch_to_it((By.ID, "contentFrame")) # 수정된 iframe ID 사용
+    )
+    print("iframe (ID='contentFrame')으로 전환 성공.")
+
+    # iframe 내부에서 띠별 링크가 포함된 'tee' 테이블이 나타날 때까지 대기
+    WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, 'tee'))
+    )
+    print("iframe 내부의 'tee' 테이블 로드 확인.")
+
+    # 띠 링크가 포함된 테이블 찾기
+    tee_table = driver.find_element(By.ID, 'tee')
+
+    # 띠 이미지 링크 요소들 찾기 ('tee' 테이블 안의 <a> 태그)
+    ddi_links_elements = tee_table.find_elements(By.TAG_NAME, 'a')
+
+    # 각 띠의 정보를 저장할 리스트 (이름과 goYear 함수의 인자)
+    ddi_info_list = []
+    for link in ddi_links_elements:
+         try:
+             # 이미지의 alt 속성에서 띠 이름 가져오기
+             img_element = link.find_element(By.TAG_NAME, 'img')
+             alt_text = img_element.get_attribute('alt')
+
+             # href 속성에서 goYear() 함수의 인자 추출
+             # 예: javascript:goYear('00') -> '00' 추출
+             href_value = link.get_attribute('href')
+             go_year_param = None
+             if href_value and 'goYear(' in href_value:
+                 start_index = href_value.find("goYear('") + len("goYear('")
+                 end_index = href_value.find("')", start_index)
+                 if start_index != -1 and end_index != -1:
+                     go_year_param = href_value[start_index:end_index]
+
+             if alt_text and go_year_param is not None:
+                 ddi_info_list.append({'name': alt_text, 'param': go_year_param})
+
+         except Exception as e:
+             print(f"띠 링크 정보 추출 중 오류 발생: {e}")
+             continue # 오류가 나도 다음 링크 진행
+
+    # 추출된 띠 정보 확인 (선택 사항)
+    # print("수집된 띠 정보:", ddi_info_list)
+
+
+    # 각 띠별로 순회하며 운세 데이터를 추출합니다.
+    for ddi_info in ddi_info_list:
+        ddi_name = ddi_info['name']
+        go_year_param = ddi_info['param']
+        print(f"\n--- {ddi_name} ({go_year_param}) 운세 데이터 추출 시작 ---")
+
+        try:
+            # goYear 자바스크립트 함수 실행
+            # iframe 내부에 있으므로 execute_script 사용
+            driver.execute_script(f"goYear('{go_year_param}');")
+            print(f"goYear('{go_year_param}') 실행 완료.")
+
+            # --- 내용 업데이트 대기 ---
+            # 페이지 내용이 새로운 띠의 정보로 업데이트될 시간을 충분히 줍니다.
+            # 2초 대기. 필요에 따라 시간 조정 가능.
+            time.sleep(2)
+            print("페이지 내용 업데이트 대기 완료.")
+            # --- 내용 업데이트 대기 끝 ---
+
+
+            # 업데이트된 페이지 소스를 가져와 BeautifulSoup으로 파싱
+            updated_html = driver.page_source
+            soup = BeautifulSoup(updated_html, 'html.parser')
+
+            # BeautifulSoup을 사용하여 년생과 운세 본문 내용을 추출
+            # iframe 내부의 HTML에서 찾습니다.
+            # class가 'year'인 모든 td 요소를 찾습니다.
+            year_elements = soup.select('td.year')
+
+            ddi_yearly_data = []
+            for year_td in year_elements:
+                 year = year_td.get_text(strip=True) # 년생 텍스트
+
+                 # 해당 년생 td의 부모 tr 요소를 찾고, 그 안에서 운세 본문 div를 찾습니다.
+                 row = year_td.find_parent('tr')
+                 if row:
+                     # class가 'today_year_td02'인 td 안의 div 요소를 찾습니다.
+                     # select_one을 사용하여 첫 번째 매칭되는 요소를 가져옵니다.
+                     fortune_div = row.select_one('td.today_year_td02 div')
+                     if fortune_div:
+                          fortune_text = fortune_div.get_text(strip=True) # 운세 본문 텍스트
+                          ddi_yearly_data.append({'년생': year, '운세': fortune_text})
+                     else:
+                          # 운세 본문 div를 찾지 못한 경우 경고
+                          print(f"경고: {ddi_name} - {year}년생에 대한 운세 본문 div를 찾을 수 없습니다.")
+                 else:
+                      # 부모 tr을 찾지 못한 경우 경고
+                      print(f"경고: {ddi_name} - {year}년생 td의 부모 tr을 찾을 수 없습니다.")
+
+
+            all_ddi_fortune_data[ddi_name] = ddi_yearly_data
+            print(f"{ddi_name} 운세 데이터 ({len(ddi_yearly_data)}개 년생) 추출 완료.")
+
+        except Exception as e:
+            print(f"!!! 오류 발생: {ddi_name} 운세 데이터 추출 중 오류 발생: {e}")
+            all_ddi_fortune_data[ddi_name] = [] # 오류 발생 시 해당 띠는 빈 리스트로 처리
+
+    print("\n--- 모든 띠 운세 데이터 추출 완료 ---")
+
+    # --- 추출된 데이터를 판다스 데이터프레임으로 변환하는 부분 ---
+    print("\n--- 추출된 데이터를 판다스 데이터프레임으로 변환 시작 ---")
+
+    # 데이터프레임을 만들기 위한 리스트 초기화
+    dataframe_data_list = []
+
+    # all_ddi_fortune_data 딕셔너리를 순회하며 데이터를 재구성
+    for ddi_name, yearly_fortunes in all_ddi_fortune_data.items():
+        # 각 띠의 년생별 운세 리스트를 순회
+        for entry in yearly_fortunes:
+            # 각 년생별 운세 정보를 딕셔너리로 만들고 리스트에 추가
+            dataframe_data_list.append({
+                '띠': ddi_name,
+                '년생': entry.get('년생', ''), # '년생' 키가 없을 경우 대비하여 기본값 설정
+                '운세': entry.get('운세', '')   # '운세' 키가 없을 경우 대비하여 기본값 설정
+            })
+
+    # 재구성된 리스트를 사용하여 판다스 데이터프레임 생성
+    df = pd.DataFrame(dataframe_data_list)
+
+    print("--- 판다스 데이터프레임 변환 완료 ---")
+
+    # 데이터프레임 확인 (CSV 저장 전)
+    print("\n# CSV 저장 전 데이터프레임 내용 (처음 15행):")
+    # to_string()은 너무 길 수 있으므로 head()로 일부만 확인
+    print(df.head(15))
+    print("\n# 데이터프레임 정보:")
+    df.info()
+    print("\n# 데이터프레임 모양 (행, 열):")
+    print(df.shape)
+
+
+    # --- 데이터프레임을 CSV 파일로 저장하는 부분 ---
+    print("\n--- 데이터프레임을 CSV 파일로 저장 중 ---")
+    try:
+        # '띠별_년생_운세.csv' 파일로 저장합니다.
+        # index=False: 데이터프레임의 인덱스(0, 1, 2...)를 CSV에 포함시키지 않습니다.
+        # encoding='utf-8-sig': 한글 깨짐 없이 CSV 파일을 저장하고 열 수 있도록 설정합니다.
+        # sep=',' : 쉼표를 구분자로 명시적으로 지정합니다. (CSV 파일 열람 프로그램 호환성 향상)
+        df.to_csv('띠별_년생_운세.csv', index=False, encoding='utf-8-sig', sep=',')
+        print("데이터프레임이 '띠별_년생_운세.csv' 파일로 성공적으로 저장되었습니다.")
+        print(f"저장 위치: 현재 파이썬 스크립트가 실행된 폴더 또는 Jupyter 노트북 파일이 있는 폴더")
+
+    except Exception as e:
+        print(f"!!! 오류 발생: CSV 파일 저장 중 오류 발생: {e}")
+
+
+except Exception as e:
+    print(f"\n!!! 심각한 오류 발생: 스크립트 실행 중 오류 발생: {e}")
+    # 오류 발생 시 추출된 데이터 (부분적일 수 있음)와 데이터프레임 변환 시도
+    if all_ddi_fortune_data: # 오류 발생 전까지 추출된 데이터가 있다면
+        print("\n--- 오류 발생 전까지 추출된 데이터로 판다스 데이터프레임 변환 시도 ---")
+        try:
+            dataframe_data_list = []
+            for ddi_name, yearly_fortunes in all_ddi_fortune_data.items():
+                for entry in yearly_fortunes:
+                     dataframe_data_list.append({
+                        '띠': ddi_name,
+                        '년생': entry.get('년생', ''),
+                        '운세': entry.get('운세', '')
+                     })
+            if dataframe_data_list:
+                df = pd.DataFrame(dataframe_data_list)
+                print("\n# 생성된 판다스 데이터프레임 (오류 전 데이터, 처음 5행):")
+                print(df.head())
+                print("\n# 데이터프레임 정보 (오류 전 데이터):")
+                df.info()
+                print("\n# 데이터프레임 모양 (오류 전 데이터):")
+                print(df.shape)
+            else:
+                print("오류 발생 전까지 추출된 데이터가 없어 데이터프레임을 생성할 수 없습니다.")
+        except Exception as pandas_error:
+             print(f"오류 복구 중 판다스 데이터프레임 변환 실패: {pandas_error}")
+
+
+finally:
+    # 브라우저 닫기
+    if driver:
+        driver.quit()
+        print("\nWebDriver 종료.")
+
+# 최종 추출된 데이터 (원본 딕셔너리) 출력 - 선택 사항
+# print("\n# 최종 추출된 데이터 (원본 딕셔너리):")
+# print(json.dumps(all_ddi_fortune_data, indent=4, ensure_ascii=False))
+
